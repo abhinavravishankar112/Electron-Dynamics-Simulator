@@ -1,4 +1,4 @@
-"""Vector math utilities for 2D algebra.
+"""Vector math utilities for 2D/3D algebra.
 
 Operations stay minimal and dependency-free so reviewers can follow the math
 directly without hidden helpers.
@@ -40,3 +40,28 @@ class Vector2:
 	@staticmethod
 	def zero() -> "Vector2":
 		return Vector2(0.0, 0.0)
+
+
+@dataclass(frozen=True)
+class Vector3:
+	x: float
+	y: float
+	z: float
+
+	def __add__(self, other: "Vector3") -> "Vector3":
+		return Vector3(self.x + other.x, self.y + other.y, self.z + other.z)
+
+	def __sub__(self, other: "Vector3") -> "Vector3":
+		return Vector3(self.x - other.x, self.y - other.y, self.z - other.z)
+
+	def __mul__(self, scalar: float) -> "Vector3":
+		return Vector3(self.x * scalar, self.y * scalar, self.z * scalar)
+
+	__rmul__ = __mul__
+
+	def to_tuple(self) -> tuple[float, float, float]:
+		return (self.x, self.y, self.z)
+
+	@staticmethod
+	def zero() -> "Vector3":
+		return Vector3(0.0, 0.0, 0.0)
