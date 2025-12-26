@@ -4,6 +4,7 @@ from .vectors import Vector2, Vector3
 from .fields import ElectricField, MagneticField, UniformElectricField, UniformMagneticField
 from .electron import Electron
 from .lorentz import lorentz_force
+from .integrators import State, AccelerationFn, rk4_step
 
 __all__ = [
 	"Vector2",
@@ -14,4 +15,7 @@ __all__ = [
 	"UniformMagneticField",
 	"Electron",
 	"lorentz_force",
+	"State",
+	"AccelerationFn",
+	"rk4_step",
 ]
