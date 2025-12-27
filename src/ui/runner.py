@@ -25,16 +25,21 @@ def run_interactive_simulation(
     time_step_s: float = 1e-11,
     max_frame_time_s: float = 1e-6,
 ) -> None:
-    """Run simulation and visualization in sync.
+    """Run simulation and visualization in sync with interactive controls.
 
     Time step is fixed for physics; frame time controls visualization framerate.
+    Keyboard input adjusts E, B, and electron velocities in real time.
     """
     visualizer_config = VisualizerConfig(fps=30)
     visualizer = Visualizer(visualizer_config)
     visualizer.initialize()
 
-    e_field = UniformElectricField(electric_field_v_per_m)
-    b_field = UniformMagneticField(magnetic_field_tesla)
+    # Keep field references mutable so we can adjust them interactively
+    current_e_field = Vector2(electric_field_v_per_m.x, electric_field_v_per_m.y)
+    current_b_field = Vector3(magnetic_field_tesla.x, magnetic_field_tesla.y, magnetic_field_tesla.z)
+    
+    e_field = UniformElectricField(current_e_field)
+    b_field = UniformMagneticField(current_b_field)
     engine = SimulationEngine(e_field, b_field)
 
     current_time = 0.0
@@ -42,19 +47,37 @@ def run_interactive_simulation(
 
     try:
         while running:
-            # Step forward by frame time
-            frame_steps = max(1, int(max_frame_time_s / time_step_s))
-            frame_config = SimulationConfig(
-                time_step_s=time_step_s,
-                total_time_s=frame_steps * time_step_s,
-                record_trajectory=False,
-            )
+            # Step forward by frame time (skip if paused)
+            if not visualizer.paused:
+                frame_steps = max(1, int(max_frame_time_s / time_step_s))
+                frame_config = SimulationConfig(
+                    time_step_s=time_step_s,
+                    total_time_s=frame_steps * time_step_s,
+                    record_trajectory=False,
+                )
 
-            result = engine.run(electrons, frame_config, start_time_s=current_time)
-            current_time = result.final_states[0].time_s if result.final_states else current_time
+                result = engine.run(electrons, frame_config, start_time_s=current_time)
+                current_time = result.final_states[0].time_s if result.final_states else current_time
 
-            # Render
-            running = visualizer.render(electrons, current_time)
+            # Render and get input adjustments
+            running, input_dict = visualizer.render(electrons, current_time, current_e_field, current_b_field.z)
+
+            # Apply field adjustments
+            if input_dict.get('e_adjust'):
+                dx, dy = input_dict['e_adjust']
+                current_e_field = Vector2(current_e_field.x + dx, current_e_field.y + dy)
+                e_field.field = current_e_field
+
+            if input_dict.get('b_adjust'):
+                db = input_dict['b_adjust']
+                current_b_field = Vector3(current_b_field.x, current_b_field.y, current_b_field.z + db)
+                b_field.field = current_b_field
+
+            # Apply velocity adjustments
+            if input_dict.get('v_adjust'):
+                dvx, dvy = input_dict['v_adjust']
+                for electron in electrons:
+                    electron.velocity = Vector2(electron.velocity.x + dvx, electron.velocity.y + dvy)
 
     finally:
         visualizer.shutdown()
