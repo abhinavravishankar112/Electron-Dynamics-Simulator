@@ -5,6 +5,7 @@ from .fields import ElectricField, MagneticField, UniformElectricField, UniformM
 from .electron import Electron
 from .lorentz import lorentz_force
 from .integrators import State, AccelerationFn, rk4_step
+from .diagnostics import kinetic_energy, verify_magnetic_energy_conservation, EnergyConservationCheck
 
 __all__ = [
 	"Vector2",
@@ -18,4 +19,7 @@ __all__ = [
 	"State",
 	"AccelerationFn",
 	"rk4_step",
+	"kinetic_energy",
+	"verify_magnetic_energy_conservation",
+	"EnergyConservationCheck",
 ]
