@@ -47,9 +47,8 @@ class Visualizer:
         self.trails: dict[int, List[Vector2]] = {}  # Per-electron trail by id()
         self.show_help = True
         # Adjustment factors for interactive controls
-        self.e_adjust_factor = 1e4  # V/m per keypress
-        self.b_adjust_factor = 0.01  # T per keypress
-        self.v_adjust_factor = 1e4  # m/s per keypress
+        self.b_adjust_factor = 0.02  # T per keypress
+        self.v_adjust_factor = 2e4  # m/s per keypress
 
     def initialize(self) -> None:
         """Set up Pygame window and resources."""
@@ -121,14 +120,14 @@ class Visualizer:
         """Process keyboard input and return adjustment dict.
         
         Returns dict with keys: 'quit', 'pause_toggle', 'reset', 'help_toggle',
-        'e_adjust', 'b_adjust', 'v_adjust'.
+        'e_preset', 'b_adjust', 'v_adjust'.
         """
         result = {
             'quit': False,
             'pause_toggle': False,
             'reset': False,
             'help_toggle': False,
-            'e_adjust': (0.0, 0.0),  # (ex_delta, ey_delta)
+            'e_preset': None,  # Set to Vector2 for preset E-field
             'b_adjust': 0.0,  # bz_delta
             'v_adjust': (0.0, 0.0),  # (vx_delta, vy_delta)
         }
@@ -141,33 +140,35 @@ class Visualizer:
                     result['quit'] = True
                 elif event.key == pygame.K_SPACE:
                     result['pause_toggle'] = True
-                elif event.key == pygame.K_r:
+                elif event.key == pygame.K_c:
                     result['reset'] = True
                 elif event.key == pygame.K_h:
                     result['help_toggle'] = True
-                # E-field adjustments (arrow keys or WASD)
-                elif event.key in (pygame.K_UP, pygame.K_w):
-                    result['e_adjust'] = (0.0, self.e_adjust_factor)
-                elif event.key in (pygame.K_DOWN, pygame.K_s):
-                    result['e_adjust'] = (0.0, -self.e_adjust_factor)
-                elif event.key in (pygame.K_LEFT, pygame.K_a):
-                    result['e_adjust'] = (-self.e_adjust_factor, 0.0)
-                elif event.key in (pygame.K_RIGHT, pygame.K_d):
-                    result['e_adjust'] = (self.e_adjust_factor, 0.0)
-                # B-field adjustments
-                elif event.key == pygame.K_q:
-                    result['b_adjust'] = self.b_adjust_factor
-                elif event.key == pygame.K_e:
-                    result['b_adjust'] = -self.b_adjust_factor
-                # Velocity adjustments
-                elif event.key == pygame.K_i:
+                # Arrow keys: adjust velocity (most intuitive)
+                elif event.key == pygame.K_UP:
                     result['v_adjust'] = (0.0, self.v_adjust_factor)
-                elif event.key == pygame.K_k:
+                elif event.key == pygame.K_DOWN:
                     result['v_adjust'] = (0.0, -self.v_adjust_factor)
-                elif event.key == pygame.K_j:
+                elif event.key == pygame.K_LEFT:
                     result['v_adjust'] = (-self.v_adjust_factor, 0.0)
-                elif event.key == pygame.K_l:
+                elif event.key == pygame.K_RIGHT:
                     result['v_adjust'] = (self.v_adjust_factor, 0.0)
+                # +/- or =/- : adjust magnetic field
+                elif event.key in (pygame.K_EQUALS, pygame.K_PLUS):
+                    result['b_adjust'] = self.b_adjust_factor
+                elif event.key == pygame.K_MINUS:
+                    result['b_adjust'] = -self.b_adjust_factor
+                # Number keys: E-field presets
+                elif event.key == pygame.K_0:
+                    result['e_preset'] = Vector2(0, 0)
+                elif event.key == pygame.K_1:
+                    result['e_preset'] = Vector2(0, 5e4)  # Up
+                elif event.key == pygame.K_2:
+                    result['e_preset'] = Vector2(0, -5e4)  # Down
+                elif event.key == pygame.K_3:
+                    result['e_preset'] = Vector2(-5e4, 0)  # Left
+                elif event.key == pygame.K_4:
+                    result['e_preset'] = Vector2(5e4, 0)  # Right
         
         return result
 
@@ -177,17 +178,11 @@ class Visualizer:
             return
         
         lines = [
-            "=== CONTROLS ===",
-            "SPACE: Pause/Resume",
-            "R: Reset trails",
-            "H: Toggle help",
-            "ESC: Quit",
-            "--- Electric Field ---",
-            "Arrow Keys / WASD: Adjust E_x, E_y",
-            "--- Magnetic Field ---",
-            "Q / E: Increase/Decrease B_z",
-            "--- Velocity ---",
-            "I / K / J / L: Adjust V_x, V_y",
+            "CONTROLS",
+            "Arrows: Change velocity",
+            "+/- : Change B field",
+            "0-4: E field presets",
+            "SPACE: Pause | C: Clear | H: Hide | ESC: Quit",
         ]
         
         y_offset = self.config.window_height - len(lines) * 16 - 10

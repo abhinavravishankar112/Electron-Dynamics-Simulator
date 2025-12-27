@@ -61,12 +61,12 @@ def run_interactive_simulation(
             # Render and get input adjustments
             running, input_dict = visualizer.render(electrons, current_time, current_e_field, current_b_field.z)
 
-            # Apply field adjustments
-            if input_dict.get('e_adjust'):
-                dx, dy = input_dict['e_adjust']
-                current_e_field = Vector2(current_e_field.x + dx, current_e_field.y + dy)
+            # Apply E-field preset (replaces current field)
+            if input_dict.get('e_preset') is not None:
+                current_e_field = input_dict['e_preset']
                 e_field.field = current_e_field
 
+            # Apply B-field adjustment (incremental)
             if input_dict.get('b_adjust'):
                 db = input_dict['b_adjust']
                 current_b_field = Vector3(current_b_field.x, current_b_field.y, current_b_field.z + db)
