@@ -83,7 +83,7 @@ y_next = y + (Δt/6)(k1 + 2k2 + 2k3 + k4)
 In magnetic-only scenarios, the simulator maintains energy conservation within **~0.4% relative error** over 10,000 time steps, validating numerical accuracy.
 
 **Typical Parameters:**
-- Time step: $\Delta t = 10^{-11}$ s (chosen to resolve electron gyroperiod)
+- Time step: $\Delta t \approx 5\times10^{-12}$ s (default for $B=0.1$ T, ~70+ steps per cyclotron period for stable RK4)
 - Simulation duration: $10^{-7}$ s (thousands of cyclotron orbits)
 
 ---
@@ -180,7 +180,7 @@ Options:
   --bz FLOAT         Magnetic field z-component (T) [default: 0.1]
   --v0x FLOAT        Initial velocity x-component (m/s) [default: 1e5]
   --v0y FLOAT        Initial velocity y-component (m/s) [default: 0.0]
-  --dt FLOAT         Physics time step (s) [default: 1e-11]
+    --dt FLOAT         Physics time step (s) [default: 5e-12]
   --frame-dt FLOAT   Simulation time per frame (s) [default: 1e-6]
 ```
 
@@ -218,6 +218,7 @@ Once the simulator window opens, use the following keyboard controls:
 | **4** | Electric field pointing right |
 | **SPACE** | Pause/Resume simulation |
 | **C** | Clear trajectory trails |
+| **R** | Reset to initial conditions (time, fields, state) |
 | **H** | Toggle help overlay |
 | **ESC** | Quit |
 

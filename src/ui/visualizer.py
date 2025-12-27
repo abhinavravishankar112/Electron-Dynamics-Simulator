@@ -119,13 +119,14 @@ class Visualizer:
     def _handle_input(self) -> dict:
         """Process keyboard input and return adjustment dict.
         
-        Returns dict with keys: 'quit', 'pause_toggle', 'reset', 'help_toggle',
+        Returns dict with keys: 'quit', 'pause_toggle', 'reset', 'clear', 'help_toggle',
         'e_preset', 'b_adjust', 'v_adjust'.
         """
         result = {
             'quit': False,
             'pause_toggle': False,
             'reset': False,
+            'clear': False,
             'help_toggle': False,
             'e_preset': None,  # Set to Vector2 for preset E-field
             'b_adjust': 0.0,  # bz_delta
@@ -141,6 +142,8 @@ class Visualizer:
                 elif event.key == pygame.K_SPACE:
                     result['pause_toggle'] = True
                 elif event.key == pygame.K_c:
+                    result['clear'] = True
+                elif event.key == pygame.K_r:
                     result['reset'] = True
                 elif event.key == pygame.K_h:
                     result['help_toggle'] = True
@@ -162,13 +165,13 @@ class Visualizer:
                 elif event.key == pygame.K_0:
                     result['e_preset'] = Vector2(0, 0)
                 elif event.key == pygame.K_1:
-                    result['e_preset'] = Vector2(0, 5e4)  # Up
+                    result['e_preset'] = Vector2(0, 2e3)  # Up
                 elif event.key == pygame.K_2:
-                    result['e_preset'] = Vector2(0, -5e4)  # Down
+                    result['e_preset'] = Vector2(0, -2e3)  # Down
                 elif event.key == pygame.K_3:
-                    result['e_preset'] = Vector2(-5e4, 0)  # Left
+                    result['e_preset'] = Vector2(-2e3, 0)  # Left
                 elif event.key == pygame.K_4:
-                    result['e_preset'] = Vector2(5e4, 0)  # Right
+                    result['e_preset'] = Vector2(2e3, 0)  # Right
         
         return result
 
@@ -182,7 +185,7 @@ class Visualizer:
             "Arrows: Change velocity",
             "+/- : Change B field",
             "0-4: E field presets",
-            "SPACE: Pause | C: Clear | H: Hide | ESC: Quit",
+            "SPACE: Pause | C: Clear | R: Reset | H: Hide | ESC: Quit",
         ]
         
         y_offset = self.config.window_height - len(lines) * 16 - 10
@@ -213,7 +216,7 @@ class Visualizer:
             self.paused = not self.paused
         if input_dict['help_toggle']:
             self.show_help = not self.show_help
-        if input_dict['reset']:
+        if input_dict['clear']:
             self.clear_trails()
 
         # Clear and draw

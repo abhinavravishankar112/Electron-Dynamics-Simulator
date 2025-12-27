@@ -21,7 +21,7 @@ def run_interactive_simulation(
     electric_field_v_per_m: Vector2,
     magnetic_field_tesla: Vector3,
     electrons: list[Electron],
-    time_step_s: float = 1e-11,
+    time_step_s: float = 5e-12,
     max_frame_time_s: float = 1e-6,
 ) -> None:
     """Run simulation and visualization in sync with interactive controls.
@@ -36,6 +36,11 @@ def run_interactive_simulation(
     # Keep field references mutable so we can adjust them interactively
     current_e_field = Vector2(electric_field_v_per_m.x, electric_field_v_per_m.y)
     current_b_field = Vector3(magnetic_field_tesla.x, magnetic_field_tesla.y, magnetic_field_tesla.z)
+    # Snapshot initial conditions for reset
+    initial_e_field = Vector2(electric_field_v_per_m.x, electric_field_v_per_m.y)
+    initial_b_field = Vector3(magnetic_field_tesla.x, magnetic_field_tesla.y, magnetic_field_tesla.z)
+    initial_positions = [Vector2(e.position.x, e.position.y) for e in electrons]
+    initial_velocities = [Vector2(e.velocity.x, e.velocity.y) for e in electrons]
     
     e_field = UniformElectricField(current_e_field)
     b_field = UniformMagneticField(current_b_field)
@@ -60,6 +65,18 @@ def run_interactive_simulation(
 
             # Render and get input adjustments
             running, input_dict = visualizer.render(electrons, current_time, current_e_field, current_b_field.z)
+
+            # Reset to initial conditions
+            if input_dict.get('reset'):
+                current_time = 0.0
+                current_e_field = Vector2(initial_e_field.x, initial_e_field.y)
+                current_b_field = Vector3(initial_b_field.x, initial_b_field.y, initial_b_field.z)
+                e_field.field = current_e_field
+                b_field.field = current_b_field
+                for i, electron in enumerate(electrons):
+                    electron.position = Vector2(initial_positions[i].x, initial_positions[i].y)
+                    electron.velocity = Vector2(initial_velocities[i].x, initial_velocities[i].y)
+                visualizer.clear_trails()
 
             # Apply E-field preset (replaces current field)
             if input_dict.get('e_preset') is not None:
@@ -89,7 +106,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     parser.add_argument("--bz", type=float, default=0.1, help="Magnetic field Bz (T)")
     parser.add_argument("--v0x", type=float, default=1e5, help="Initial velocity vx (m/s)")
     parser.add_argument("--v0y", type=float, default=0.0, help="Initial velocity vy (m/s)")
-    parser.add_argument("--dt", type=float, default=1e-11, help="Physics time step (s)")
+    parser.add_argument("--dt", type=float, default=5e-12, help="Physics time step (s)")
     parser.add_argument("--frame-dt", type=float, default=1e-6, help="Max simulation time per frame (s)")
 
     args = parser.parse_args(argv)
