@@ -120,7 +120,7 @@ class Visualizer:
         """Process keyboard input and return adjustment dict.
         
         Returns dict with keys: 'quit', 'pause_toggle', 'reset', 'clear', 'help_toggle',
-        'e_preset', 'b_adjust', 'v_adjust'.
+        'b_adjust', 'v_adjust'.
         """
         result = {
             'quit': False,
@@ -128,7 +128,6 @@ class Visualizer:
             'reset': False,
             'clear': False,
             'help_toggle': False,
-            'e_preset': None,  # Set to Vector2 for preset E-field
             'b_adjust': 0.0,  # bz_delta
             'v_adjust': (0.0, 0.0),  # (vx_delta, vy_delta)
         }
@@ -161,17 +160,6 @@ class Visualizer:
                     result['b_adjust'] = self.b_adjust_factor
                 elif event.key == pygame.K_MINUS:
                     result['b_adjust'] = -self.b_adjust_factor
-                # Number keys: E-field presets
-                elif event.key == pygame.K_0:
-                    result['e_preset'] = Vector2(0, 0)
-                elif event.key == pygame.K_1:
-                    result['e_preset'] = Vector2(0, 2e3)  # Up
-                elif event.key == pygame.K_2:
-                    result['e_preset'] = Vector2(0, -2e3)  # Down
-                elif event.key == pygame.K_3:
-                    result['e_preset'] = Vector2(-2e3, 0)  # Left
-                elif event.key == pygame.K_4:
-                    result['e_preset'] = Vector2(2e3, 0)  # Right
         
         return result
 
@@ -184,7 +172,6 @@ class Visualizer:
             "CONTROLS",
             "Arrows: Change velocity",
             "+/- : Change B field",
-            "0-4: E field presets",
             "SPACE: Pause | C: Clear | R: Reset | H: Hide | ESC: Quit",
         ]
         

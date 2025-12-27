@@ -78,11 +78,6 @@ def run_interactive_simulation(
                     electron.velocity = Vector2(initial_velocities[i].x, initial_velocities[i].y)
                 visualizer.clear_trails()
 
-            # Apply E-field preset (replaces current field)
-            if input_dict.get('e_preset') is not None:
-                current_e_field = input_dict['e_preset']
-                e_field.field = current_e_field
-
             # Apply B-field adjustment (incremental)
             if input_dict.get('b_adjust'):
                 db = input_dict['b_adjust']
