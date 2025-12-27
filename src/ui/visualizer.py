@@ -28,7 +28,7 @@ class VisualizerConfig:
     window_width: int = 800
     window_height: int = 600
     fps: int = 30
-    pixel_scale_m: float = 1e8  # meters per pixel
+    pixel_scale_m: float = 1e7  # meters per pixel (adjusted for electron cyclotron motion)
     electron_radius_px: int = 5
     max_trail_points: int = 500
 
